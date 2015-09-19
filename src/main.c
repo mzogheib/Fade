@@ -52,8 +52,10 @@ int hour1, hour2, min1, min2;
 // Dimensions of all the screen components
 int num_bars_color;
 int num_bars_solid;
-int horiz_bars_solid_x, horiz_bars_solid_y, horiz_bars_solid_w, horiz_bars_solid_h;
-int horiz_bars_color_x, horiz_bars_color_y, horiz_bars_color_w, horiz_bars_color_h;
+int horiz_bars_solid_lef_x, horiz_bars_solid_lef_y, horiz_bars_solid_lef_w, horiz_bars_solid_lef_h;
+int horiz_bars_solid_rig_x, horiz_bars_solid_rig_y, horiz_bars_solid_rig_w, horiz_bars_solid_rig_h;
+int horiz_bars_color_lef_x, horiz_bars_color_lef_y, horiz_bars_color_lef_w, horiz_bars_color_lef_h;
+int horiz_bars_color_rig_x, horiz_bars_color_rig_y, horiz_bars_color_rig_w, horiz_bars_color_rig_h;
 int	digit_bar_x;
 int	digit_bar_y;
 int	digit_bar_h;
@@ -71,15 +73,25 @@ void init_dimensions() {
   num_bars_color = 8;
   num_bars_solid = num_bars_color-1;
   
-  horiz_bars_color_x = 0;
-  horiz_bars_color_y = 0;
-  horiz_bars_color_w = 168;
-  horiz_bars_color_h = 14;
+  horiz_bars_color_lef_x = 0;
+  horiz_bars_color_lef_y = 0;
+  horiz_bars_color_lef_w = digit_bar_x + digit_bar_w/2;
+  horiz_bars_color_lef_h = 14;
+	
+  horiz_bars_color_rig_x = horiz_bars_color_lef_x + horiz_bars_color_lef_w;
+  horiz_bars_color_rig_y = horiz_bars_color_lef_y;
+  horiz_bars_color_rig_w = 144 - (horiz_bars_color_lef_x + horiz_bars_color_lef_w);
+  horiz_bars_color_rig_h = horiz_bars_color_lef_h;
 
-  horiz_bars_solid_x = 0;
-  horiz_bars_solid_y = horiz_bars_color_y+horiz_bars_color_h;
-  horiz_bars_solid_w = 168;
-  horiz_bars_solid_h = (168-num_bars_color*horiz_bars_color_h)/num_bars_solid;
+  horiz_bars_solid_lef_x = horiz_bars_color_lef_x;
+  horiz_bars_solid_lef_y = horiz_bars_color_lef_y + horiz_bars_color_lef_h;
+  horiz_bars_solid_lef_w = horiz_bars_color_lef_w;
+  horiz_bars_solid_lef_h = (168 - num_bars_color*horiz_bars_color_lef_h)/num_bars_solid;
+
+  horiz_bars_solid_rig_x = horiz_bars_color_rig_x;
+  horiz_bars_solid_rig_y = horiz_bars_color_rig_y + horiz_bars_color_rig_h;
+  horiz_bars_solid_rig_w = horiz_bars_color_rig_w;
+  horiz_bars_solid_rig_h = horiz_bars_solid_lef_h;
 
   digit_padding = 8;
 	
@@ -132,6 +144,8 @@ void draw_stroke_right_lwr(GContext *ctx, GRect bounds) {
 // Draw the digits
 void draw_digit(GContext *ctx, Layer *me, int digit) {
 	GRect bounds = layer_get_bounds(me);
+	
+	digit = -1;
 	
 	if(digit>=0) {
 		graphics_context_set_fill_color(ctx, color_bg);
@@ -239,7 +253,9 @@ void draw_background_static(Layer *me, GContext *ctx) {
 	// Horizontal blacks bars
 	int i;
 	for(i=0; i<num_bars_solid; i++) {
-	  graphics_fill_rect(ctx, GRect(horiz_bars_solid_x, horiz_bars_solid_y + i*(horiz_bars_color_h+horiz_bars_solid_h), horiz_bars_color_w, horiz_bars_color_h), 0, GCornerNone);
+	  graphics_fill_rect(ctx, GRect(horiz_bars_solid_lef_x, horiz_bars_solid_lef_y + i*(horiz_bars_color_lef_h+horiz_bars_solid_lef_h), horiz_bars_color_lef_w, horiz_bars_color_lef_h), 0, GCornerNone);
+	  graphics_fill_rect(ctx, GRect(horiz_bars_solid_rig_x, horiz_bars_solid_rig_y + i*(horiz_bars_color_rig_h+horiz_bars_solid_rig_h), horiz_bars_color_rig_w, horiz_bars_color_rig_h), 0, GCornerNone);
+		
 	}
 	
 }
@@ -267,7 +283,11 @@ void draw_background_dynamic(Layer *me, GContext *ctx) {
 		}
 		
 		graphics_context_set_fill_color(ctx, GColorFromRGB(R, G, B));
-	  graphics_fill_rect(ctx, GRect(horiz_bars_color_x, horiz_bars_color_y + i*(horiz_bars_color_h+horiz_bars_solid_h), horiz_bars_color_w, horiz_bars_color_h), 0, GCornerNone);
+	  graphics_fill_rect(ctx, GRect(horiz_bars_color_lef_x, horiz_bars_color_lef_y + i*(horiz_bars_color_lef_h+horiz_bars_solid_lef_h), horiz_bars_color_lef_w, horiz_bars_color_lef_h), 0, GCornerNone);
+		graphics_context_set_fill_color(ctx, GColorFromRGB(255, 255, 255));
+	  
+		graphics_fill_rect(ctx, GRect(horiz_bars_color_rig_x, horiz_bars_color_rig_y + i*(horiz_bars_color_rig_h+horiz_bars_solid_rig_h), horiz_bars_color_rig_w, horiz_bars_color_rig_h), 0, GCornerNone);
+	
 	}
   
 }
@@ -336,16 +356,16 @@ void main_window_load() {
 	background_dynamic = layer_create(bounds);
   layer_set_update_proc(background_dynamic, draw_background_dynamic);
   
-  hour1_layer = layer_create(GRect(digit_bar_x, 0, digit_bar_w, 2*horiz_bars_color_h+horiz_bars_solid_h));
+  hour1_layer = layer_create(GRect(digit_bar_x, 0, digit_bar_w, 2*horiz_bars_color_lef_h+horiz_bars_solid_lef_h));
   layer_set_update_proc(hour1_layer, draw_hour1);
 
-  hour2_layer = layer_create(GRect(digit_bar_x, 2*horiz_bars_color_h+2*horiz_bars_solid_h, digit_bar_w, 2*horiz_bars_color_h+horiz_bars_solid_h));
+  hour2_layer = layer_create(GRect(digit_bar_x, 2*horiz_bars_color_lef_h+2*horiz_bars_solid_lef_h, digit_bar_w, 2*horiz_bars_color_lef_h+horiz_bars_solid_lef_h));
   layer_set_update_proc(hour2_layer, draw_hour2);
 	
-  min1_layer = layer_create(GRect(digit_bar_x, 4*horiz_bars_color_h+4*horiz_bars_solid_h, digit_bar_w, 2*horiz_bars_color_h+horiz_bars_solid_h));
+  min1_layer = layer_create(GRect(digit_bar_x, 4*horiz_bars_color_lef_h+4*horiz_bars_solid_lef_h, digit_bar_w, 2*horiz_bars_color_lef_h+horiz_bars_solid_lef_h));
   layer_set_update_proc(min1_layer, draw_min1);
 
-  min2_layer = layer_create(GRect(digit_bar_x, 6*horiz_bars_color_h+6*horiz_bars_solid_h, digit_bar_w, 2*horiz_bars_color_h+horiz_bars_solid_h));
+  min2_layer = layer_create(GRect(digit_bar_x, 6*horiz_bars_color_lef_h+6*horiz_bars_solid_lef_h, digit_bar_w, 2*horiz_bars_color_lef_h+horiz_bars_solid_lef_h));
   layer_set_update_proc(min2_layer, draw_min2);
 	
   layer_add_child(window_layer, background_static);

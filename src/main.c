@@ -63,7 +63,7 @@ int digit_padding;
 // Init all the dimensions
 // Use this later to set all the config variables
 void init_dimensions() {
-	digit_bar_w = 40;
+	digit_bar_w = 44;
 	digit_bar_h = 168;
 	digit_bar_y = 0;
   digit_bar_x = 144/2-digit_bar_w/2;

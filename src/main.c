@@ -53,7 +53,7 @@ int hour1, hour2, min1, min2;
 int bars_color_num;
 int bars_color_lef_x, bars_color_lef_y, bars_color_lef_w, bars_color_lef_h;
 int bars_color_rig_x, bars_color_rig_y, bars_color_rig_w, bars_color_rig_h;
-int bars_color_gap;
+int bars_color_gap, bars_color_incr;
 int	digit_bar_x;
 int	digit_bar_y;
 int	digit_bar_h;
@@ -63,7 +63,7 @@ int digit_padding;
 // Init all the dimensions
 // Use this later to set all the config variables
 void init_dimensions() {
-	digit_bar_w = 44;
+	digit_bar_w = 40;
 	digit_bar_h = 168;
 	digit_bar_y = 0;
   digit_bar_x = 144/2-digit_bar_w/2;
@@ -81,7 +81,7 @@ void init_dimensions() {
   bars_color_rig_h = bars_color_lef_h;
 	
   bars_color_gap = (168 - bars_color_num*bars_color_lef_h)/(bars_color_num-1);
-	
+	bars_color_incr = 0;
   digit_padding = 8;
 	
 	color_text = GColorWhite;
@@ -238,9 +238,7 @@ void draw_background_static(Layer *me, GContext *ctx) {
 	graphics_context_set_fill_color(ctx, color_bg);
   graphics_fill_rect(ctx, layer_get_bounds(me), 0, GCornerNone);
   graphics_fill_rect(ctx, GRect(digit_bar_x,digit_bar_y, digit_bar_w, digit_bar_h), 0, GCornerNone);
-	
 
-	
 }
 
 // Draws the dynamic elements of the background
@@ -266,9 +264,9 @@ void draw_background_dynamic(Layer *me, GContext *ctx) {
 		}
 		
 		graphics_context_set_fill_color(ctx, GColorFromRGB(R, G, B));
-	  graphics_fill_rect(ctx, GRect(bars_color_lef_x, bars_color_lef_y + i*(bars_color_lef_h+bars_color_gap), bars_color_lef_w, bars_color_lef_h), 0, GCornerNone);
+	  graphics_fill_rect(ctx, GRect(bars_color_lef_x, bars_color_lef_y + i*(bars_color_lef_h+bars_color_gap), bars_color_lef_w + bars_color_incr, bars_color_lef_h), 0, GCornerNone);
 		//graphics_context_set_fill_color(ctx, GColorFromRGB(255, 255, 255));
-		graphics_fill_rect(ctx, GRect(bars_color_rig_x, bars_color_rig_y + i*(bars_color_rig_h+bars_color_gap), bars_color_rig_w, bars_color_rig_h), 0, GCornerNone);
+		graphics_fill_rect(ctx, GRect(bars_color_rig_x, bars_color_rig_y + i*(bars_color_rig_h+bars_color_gap), bars_color_rig_w + bars_color_incr, bars_color_rig_h), 0, GCornerNone);
 	
 	}
   

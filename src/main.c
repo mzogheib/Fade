@@ -60,6 +60,10 @@ int	digit_bar_h;
 int	digit_bar_w;
 int digit_padding;
 
+// Battery charge level
+int charge, charge_plugged_in;
+int just_plugged_in = 0;
+
 // Init all the dimensions
 // Use this later to set all the config variables
 void init_dimensions() {
@@ -248,19 +252,50 @@ void draw_background_dynamic(Layer *me, GContext *ctx) {
 	
 	// Take a peek at the battery state
 	BatteryChargeState charge_state = battery_state_service_peek();
-	int charge = charge_state.charge_percent;
+  if(charge_state.is_plugged) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Plugged in."); 
+    // Cord is plugged in so need to handle the battery level manually
+    if(just_plugged_in) {
+			APP_LOG(APP_LOG_LEVEL_INFO, "Just plugged in.");
+      // Display the last known battery level, set the new plugged in level and change the flag
+			charge_plugged_in = charge_state.charge_percent;
+      just_plugged_in = 0;
+    } else {
+			APP_LOG(APP_LOG_LEVEL_INFO, "Previously plugged in."); 
+      // If API level has increased then increment the charge for display
+			if(charge_state.charge_percent > charge_plugged_in) {
+				if(charge>=100) {
+					charge = 100;
+				} else {
+					charge+=10;
+				}
+				charge_plugged_in = charge_state.charge_percent;
+			}  
+			
+			// Need to stop incrementing when it is 100%
+			
+    }
+  } else {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Unplugged."); 
+    // Cord is unplugged so reset the flag for next time. Can handle the battery via the API
+    just_plugged_in = 1;
+    charge = charge_state.charge_percent;
+  }
 	//charge = 20;
-	charge = charge/10 -1;
+	int charge_i = charge/10 - 1;
+	APP_LOG(APP_LOG_LEVEL_INFO, "Charge level in draw_background_dynamic: %d", charge);
+	APP_LOG(APP_LOG_LEVEL_INFO, "But API charge level is: %d", charge_state.charge_percent); 
+	
   	
 	for(i=0; i<bars_color_num; i++) {
 		if(bluetooth_connection_service_peek()) {
-			R = fadeArrayBTOn[charge][i].R;
-			G = fadeArrayBTOn[charge][i].G;
-			B = fadeArrayBTOn[charge][i].B;
+			R = fadeArrayBTOn[charge_i][i].R;
+			G = fadeArrayBTOn[charge_i][i].G;
+			B = fadeArrayBTOn[charge_i][i].B;
 		} else {
-			R = fadeArrayBTOff[charge][i].R;
-			G = fadeArrayBTOff[charge][i].G;
-			B = fadeArrayBTOff[charge][i].B;
+			R = fadeArrayBTOff[charge_i][i].R;
+			G = fadeArrayBTOff[charge_i][i].G;
+			B = fadeArrayBTOff[charge_i][i].B;
 		}
 		
 		graphics_context_set_fill_color(ctx, GColorFromRGB(R, G, B));
@@ -279,14 +314,12 @@ void handle_bluetooth(bool connected) {
 }
 
 // Battery handler
-void handle_battery(BatteryChargeState charge_state) {
-	// Redraw the dynamic background layer
+void handle_battery(BatteryChargeState charge_state) {	
 	layer_mark_dirty(background_dynamic);
 }
 
 // Update the digits
 void update_time(struct tm *tick_time) {
-
 	if(clock_is_24h_style() == true) {	
 		hour1 = tick_time->tm_hour/10;
 		hour2 = tick_time->tm_hour%10;
@@ -354,7 +387,12 @@ void main_window_load() {
   layer_add_child(window_layer, hour2_layer);
   layer_add_child(window_layer, min1_layer);
   layer_add_child(window_layer, min2_layer);
-
+	
+	// Call the battery handler to ensure correct charge level is displayed
+  BatteryChargeState initial_state = battery_state_service_peek();
+  charge = charge_plugged_in = initial_state.charge_percent;
+	handle_battery(initial_state);
+	
 }
 
 void main_window_unload() {

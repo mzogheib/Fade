@@ -20,6 +20,14 @@ typedef struct {
     int B;
 } ColorRGB;
 
+#ifdef PBL_PLATFORM_EMERY
+#define COLOR_BAR_HEIGHT 18
+#define DIGIT_BAR_WIDTH 56
+#else
+#define COLOR_BAR_HEIGHT 14
+#define DIGIT_BAR_WIDTH 40
+#endif
+
 // 10 battery levels by 8 coloured bars
 ColorRGB fadeArrayBTOn[10][8] = {
     /* 10% */ {{255, 0, 0}, {255, 0, 0}, {170, 0, 0}, {170, 0, 0}, {85, 0, 0}, {85, 0, 0}, {0, 0, 170}, {0, 0, 170}},
@@ -50,7 +58,7 @@ ColorRGB fadeArrayBTOff[10][8] = {
 int hour1, hour2, min1, min2;
 
 // Dimensions of all the screen components
-int bars_color_num;
+int bars_color_num, bars_black_num;
 int bars_color_lef_x, bars_color_lef_y, bars_color_lef_w, bars_color_lef_h;
 int bars_color_rig_x, bars_color_rig_y, bars_color_rig_w, bars_color_rig_h;
 int bars_color_gap, bars_color_incr;
@@ -63,26 +71,27 @@ int digit_padding;
 // Init all the dimensions
 // Use this later to set all the config variables
 void init_dimensions() {
-    digit_bar_w = 40;
-    digit_bar_h = 168;
+    digit_bar_w = DIGIT_BAR_WIDTH;
+    digit_bar_h = PBL_DISPLAY_HEIGHT;
     digit_bar_y = 0;
-    digit_bar_x = 144/2-digit_bar_w/2;
+    digit_bar_x = PBL_DISPLAY_WIDTH/2-digit_bar_w/2;
 
     bars_color_num = 8;
+    bars_black_num = bars_color_num-1;
 
     bars_color_lef_x = 0;
     bars_color_lef_y = 0;
     bars_color_lef_w = digit_bar_x + digit_bar_w/2;
-    bars_color_lef_h = 14;
+    bars_color_lef_h = COLOR_BAR_HEIGHT;
 
     bars_color_rig_x = bars_color_lef_x + bars_color_lef_w;
     bars_color_rig_y = bars_color_lef_y;
-    bars_color_rig_w = 144 - (bars_color_lef_x + bars_color_lef_w);
+    bars_color_rig_w = PBL_DISPLAY_WIDTH - (bars_color_lef_x + bars_color_lef_w);
     bars_color_rig_h = bars_color_lef_h;
 
-    bars_color_gap = (168 - bars_color_num*bars_color_lef_h)/(bars_color_num-1);
+    bars_color_gap = (PBL_DISPLAY_HEIGHT - bars_color_num*bars_color_lef_h)/(bars_black_num);
     bars_color_incr = 0;
-    digit_padding = 8;
+    digit_padding = (PBL_DISPLAY_HEIGHT - bars_color_num*COLOR_BAR_HEIGHT)/bars_black_num;
 
     color_text = GColorWhite;
     color_bg = GColorBlack;

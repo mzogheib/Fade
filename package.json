@@ -31,7 +31,8 @@
             "watchface": true
         },
         "targetPlatforms": [
-            "basalt"
+            "basalt",
+            "emery"
         ],
         "capabilities": []
     },

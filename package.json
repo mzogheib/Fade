@@ -1,0 +1,41 @@
+{
+    "version": "1.2.0",
+    "author": "Marwan Zogheib",
+    "private": true,
+    "dependencies": {},
+    "keywords": [
+        "pebble-app"
+    ],
+    "pebble": {
+        "sdkVersion": "3",
+        "resources": {
+            "media": [
+                {
+                    "menuIcon": true,
+                    "type": "png",
+                    "name": "IMAGE_MENU_ICON",
+                    "file": "menu_icon.png"
+                }
+            ]
+        },
+        "projectType": "native",
+        "uuid": "d954224b-2005-4049-a5b9-3ac68e37139d",
+        "messageKeys": {
+            "dummy": 0
+        },
+        "enableMultiJS": false,
+        "displayName": "Fade",
+        "watchapp": {
+            "onlyShownOnCommunication": false,
+            "hiddenApp": false,
+            "watchface": true
+        },
+        "targetPlatforms": [
+            "basalt",
+            "chalk",
+            "emery"
+        ],
+        "capabilities": []
+    },
+    "name": "Fade"
+}

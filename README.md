@@ -1,5 +1,5 @@
 # Fade
-Fade watchface for Pebble Time
+Fade watchface for Pebble.
 
 White digits down the middle.
 Coloured bars on either side to display battery and Bluetooth state
